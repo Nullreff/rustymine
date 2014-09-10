@@ -1,12 +1,15 @@
 use std::io::{Listener, Acceptor};
 use std::io::net::tcp::TcpListener;
 
+static HOST:&'static str = "0.0.0.0";
+static PORT:u16          = 25565;
+
 fn main() {
     let message = "{\"description\":\"Server is offline\",\"players\":{\"max\":0,\"online\":0},\"version\":{\"name\":\"1.8\",\"protocol\":47}}";
     let length = message.len().to_u16().unwrap();
 
-    let mut acceptor = TcpListener::bind("0.0.0.0", 25565).listen().unwrap();
-    println!("listening started, ready to accept");
+    let mut acceptor = TcpListener::bind(HOST, PORT).listen().unwrap();
+    println!("Listening on {}:{}", HOST, PORT);
     for opt_stream in acceptor.incoming() {
         spawn(proc() {
             let mut stream = opt_stream.unwrap();

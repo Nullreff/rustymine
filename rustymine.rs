@@ -42,7 +42,7 @@ struct Packet {
 enum PacketValue {
     Command,
     Data(Vec<u8>),
-    String(String)
+    Message(String)
 }
 
 trait PacketStream {
@@ -57,7 +57,7 @@ impl Packet {
         match self.value {
             Command => 1,
             Data(ref data) => 1 + data.len(),
-            String(ref string) => {
+            Message(ref string) => {
                 let len = string.len();
                 1 + len + len.to_varint().len()
             }
@@ -73,7 +73,7 @@ impl Packet {
             Data(ref data) => {
                 response.push_all(data.as_slice());
             },
-            String(ref string) => {
+            Message(ref string) => {
                 response.push_all(string.len().to_varint().as_slice());
                 response.push_all(string.as_bytes());
             }
@@ -112,7 +112,7 @@ impl PacketStream for TcpStream {
         match std::str::from_utf8(data.as_slice()) {
             Some(string) => Ok(Packet {
                 cmd: command,
-                value: String(string.to_string())
+                value: Message(string.to_string())
             }),
             None => Err(IoError {
                 kind: InvalidInput,
@@ -141,7 +141,7 @@ fn process_stream(mut stream: TcpStream) -> IoResult<()> {
                     try!(stream.read_packet_command());
 
                     // Send back the server status as JSON
-                    try!(stream.write_packet(Packet {cmd: 0, value: String(message.to_string())}));
+                    try!(stream.write_packet(Packet {cmd: 0, value: Message(message.to_string())}));
 
                     // Then receive and respond to the ping packet
                     let ping = try!(stream.read_packet_data());
@@ -150,7 +150,7 @@ fn process_stream(mut stream: TcpStream) -> IoResult<()> {
                 // Login
                 2 => {
                     match stream.read_packet_string().unwrap() {
-                        Packet {cmd: _, value: String(name)} => {
+                        Packet {cmd: _, value: Message(name)} => {
                             println!("Connection from {} ({})", name, ip);
                         },
                         _ => println!("Invalid login packet")

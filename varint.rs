@@ -37,14 +37,14 @@ pub trait ReadVarint<T> {
 }
 
 pub trait ToVarint {
-    fn to_varint(&self) -> &[u8];
+    fn to_varint(&self) -> Vec<u8>;
 }
 
 impl ToVarint for uint {
     // Takes 7 bits at a time from a number and splits them into a list of
     // bytes. The most significant bit is set on each byte that has another
     // coming after it.
-    fn to_varint(&self) -> &[u8] {
+    fn to_varint(&self) -> Vec<u8> {
         let mut remaining = self.clone();
         let mut result = Vec::new();
         loop {
@@ -57,7 +57,7 @@ impl ToVarint for uint {
                 break;
             }
         }
-        result.as_slice()
+        result
     }
 }
 

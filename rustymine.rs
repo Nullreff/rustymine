@@ -159,8 +159,8 @@ fn process_stream(mut stream: TcpStream) -> IoResult<()> {
                 },
                 // Login
                 2 => {
-                    match stream.read_packet_string().unwrap() {
-                        Packet {cmd: _, value: Message(name)} => {
+                    match stream.read_packet_string() {
+                        Ok(Packet {cmd: _, value: Message(name)}) => {
                             println!("Connection from {} ({})", name, ip);
                         },
                         _ => println!("Invalid login packet")

@@ -51,10 +51,10 @@ impl ToVarint for uint {
             let part = (remaining & 0x7F).to_u8().unwrap(); // First 7 bits
             remaining >>= 7;
             if remaining == 0 {
-                result.push(part | 0x80);
-            } else {
                 result.push(part);
                 break;
+            } else {
+                result.push(part | 0x80);
             }
         }
         result
@@ -71,7 +71,7 @@ impl ReadVarint<IoError> for TcpStream {
         for i in range(0, 4) {
             match self.read_byte() {
                 Ok(part) => {
-                    result &= (part & 0x7F).to_uint().unwrap() << i;
+                    result |= (part & 0b0111111).to_uint().unwrap() << i;
                     if (part >> 7) == 0 {
                         break;
                     }

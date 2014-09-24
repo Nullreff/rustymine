@@ -99,6 +99,13 @@ impl PacketStream for TcpStream {
 
     fn read_packet_data(&mut self) -> IoResult<Packet> {
         let size = try!(self.read_varint());
+        if size == 0 {
+            return Err(IoError {
+                kind: InvalidInput,
+                desc: "Data packet with size zero",
+                detail: None
+            });
+        }
         let command = try!(self.read_byte());
         let data = try!(self.read_exact(size - 1));
         Ok(Packet {cmd: command, value: Data(data)})
@@ -128,7 +135,7 @@ impl PacketStream for TcpStream {
 }
 
 fn process_stream(mut stream: TcpStream) -> IoResult<()> {
-    let message = "{\"description\":\"Server is offline\",\"players\":{\"max\":0,\"online\":0},\"version\":{\"name\":\"1.8\",\"protocol\":47}}";
+    let message = "{\"description\":\"Rustymine Server\",\"players\":{\"max\":0,\"online\":0},\"version\":{\"name\":\"1.8\",\"protocol\":47}}";
 
     let ip = try!(stream.peer_name()).ip;
     let packet = try!(stream.read_packet_data());
@@ -137,6 +144,8 @@ fn process_stream(mut stream: TcpStream) -> IoResult<()> {
             match data[13] {
                 // Query
                 1 => {
+                    println!("Query from {}", ip);
+
                     // We don't need anything from the second packet sent
                     try!(stream.read_packet_command());
 
@@ -146,6 +155,7 @@ fn process_stream(mut stream: TcpStream) -> IoResult<()> {
                     // Then receive and respond to the ping packet
                     let ping = try!(stream.read_packet_data());
                     try!(stream.write_packet(ping));
+
                 },
                 // Login
                 2 => {

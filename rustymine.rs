@@ -178,8 +178,10 @@ fn process_stream(mut stream: TcpStream) -> IoResult<()> {
 }
 
 fn main() {
-    let mut acceptor = TcpListener::bind("0.0.0.0", 25565).listen().unwrap();
-    println!("listening started, ready to accept");
+    let address = "0.0.0.0";
+    let port = 25565;
+    let mut acceptor = TcpListener::bind(address, port).listen().unwrap();
+    println!("Rustymine is listening on {}:{}", address, port);
     for opt_stream in acceptor.incoming() {
         spawn(proc() process_stream(opt_stream.unwrap()).unwrap())
     }

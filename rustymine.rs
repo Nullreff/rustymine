@@ -33,7 +33,8 @@ use std::io::net::tcp::{TcpListener, TcpStream};
 use varint::{ReadVarint, ToVarint};
 mod varint;
 
-// Most of this was put together using http://wiki.vg/Protocoland Wireshark captures.
+// Most of this was put together using http://wiki.vg/Protocol
+// and Wireshark captures.
 struct Packet {
     cmd: u8,
     value: PacketValue

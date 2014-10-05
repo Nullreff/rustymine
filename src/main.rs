@@ -38,6 +38,7 @@ struct Configuration{
     address: String,
     port: u16,
     description: String,
+    disconnect_message: String,
     online_players: uint,
     max_players: uint,
     protocol_name: String,
@@ -174,6 +175,7 @@ fn process_stream(config: Configuration, mut stream: TcpStream) -> IoResult<()> 
                     match stream.read_packet_string() {
                         Ok(Packet {cmd: _, value: Message(name)}) => {
                             println!("Connection from {} ({})", name, ip);
+                            try!(stream.write_packet(Packet {cmd: 0, value: Message(config.disconnect_message)}));
                         },
                         _ => println!("Invalid login packet")
                     }
@@ -194,6 +196,7 @@ fn main() {
         address: "0.0.0.0".to_string(),
         port: 25565,
         description: "Rustymine Server".to_string(),
+        disconnect_message: "\"Sorry. We haven't implemented login yet.\"".to_string(),
         online_players: 0,
         max_players: 20,
         protocol_name: "1.8".to_string(),

@@ -14,9 +14,17 @@ Code is released under BSD
 Building
 --------
 
-Please use [Rust Nightly](http://www.rust-lang.org/install.html) or build from source.  Once you have a working `rustc` command:
+Get [Cargo](http://crates.io/) and run:
+
+```bash
+cargo build
+./target/rustymine
+```
+
+Alternatively you can use [Rust Nightly](http://www.rust-lang.org/install.html) or build from source.  Once you have a working `rustc` command:
 
 ```bash
 rustc rustymine.rs
 ./rustymine
 ```
+

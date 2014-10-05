@@ -33,6 +33,17 @@ use std::io::net::tcp::{TcpListener, TcpStream};
 use varint::{ReadVarint, ToVarint};
 mod varint;
 
+#[deriving(Clone)]
+struct Configuration{
+    address: String,
+    port: u16,
+    description: String,
+    online_players: uint,
+    max_players: uint,
+    protocol_name: String,
+    protocol_number: uint
+}
+
 // Most of this was put together using http://wiki.vg/Protocol
 // and Wireshark captures.
 struct Packet {
@@ -135,9 +146,9 @@ impl PacketStream for TcpStream {
     }
 }
 
-fn process_stream(mut stream: TcpStream) -> IoResult<()> {
-    let message = "{\"description\":\"Rustymine Server\",\"players\":{\"max\":0,\"online\":0},\"version\":{\"name\":\"1.8\",\"protocol\":47}}";
-
+fn process_stream(config: Configuration, mut stream: TcpStream) -> IoResult<()> {
+    let message = format!("{{\"description\":\"{:s}\",\"players\":{{\"max\":{:u},\"online\":{:u}}},\"version\":{{\"name\":\"{:s}\",\"protocol\":{:u}}}}}", config.description, config.max_players, config.online_players, config.protocol_name, config.protocol_number);
+    
     let ip = try!(stream.peer_name()).ip;
     let packet = try!(stream.read_packet_data());
     match packet {
@@ -179,11 +190,19 @@ fn process_stream(mut stream: TcpStream) -> IoResult<()> {
 }
 
 fn main() {
-    let address = "0.0.0.0";
-    let port = 25565;
-    let mut acceptor = TcpListener::bind(address, port).listen().unwrap();
-    println!("Rustymine is listening on {}:{}", address, port);
+    let config = Configuration{
+        address: "0.0.0.0".to_string(),
+        port: 25565,
+        description: "Rustymine Server".to_string(),
+        online_players: 0,
+        max_players: 20,
+        protocol_name: "1.8".to_string(),
+        protocol_number: 47
+    };
+    let mut acceptor = TcpListener::bind(config.address.as_slice(), config.port).listen().unwrap();
+    println!("Rustymine is listening on {}:{}", config.address, config.port);
     for opt_stream in acceptor.incoming() {
-        spawn(proc() process_stream(opt_stream.unwrap()).unwrap())
+        let clone = config.clone();
+        spawn(proc() process_stream(clone, opt_stream.unwrap()).unwrap())
     }
 }

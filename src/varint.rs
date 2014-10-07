@@ -71,7 +71,7 @@ impl ReadVarint<IoError> for TcpStream {
         for i in range(0, 4) {
             match self.read_byte() {
                 Ok(part) => {
-                    result |= (part & 0b0111111).to_uint().unwrap() << i;
+                    result |= (part & 0b0111111).to_uint().unwrap() << (i * 7);
                     if (part >> 7) == 0 {
                         break;
                     }
